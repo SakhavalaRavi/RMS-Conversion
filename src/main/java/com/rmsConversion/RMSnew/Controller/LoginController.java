@@ -35,7 +35,7 @@ public class LoginController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             String token = jwtUtil.generateToken(username);
-            boolean isAdmin = false;
+            //boolean isAdmin = false;
             for (UserRole roleObj : user.getUserRole()) {
                 String role = roleObj.getRole();
                 if ("ROLE_ADMIN".equalsIgnoreCase(role)) {
