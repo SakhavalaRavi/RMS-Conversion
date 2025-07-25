@@ -27,7 +27,6 @@ public class LoginController {
         JSONArray responseArray = new JSONArray();
         JSONObject response = new JSONObject();
 
-        // Find user by username
         Optional<User> userOpt = userService.findByUsername(username)
                 .filter(User::isEnabled)
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()));
@@ -48,7 +47,6 @@ public class LoginController {
                     return responseArray.toString();
                 }
             }
-            // If not admin, check for other roles
             for (UserRole roleObj : user.getUserRole()) {
                 String role = roleObj.getRole();
                 if ("ROLE_USER".equalsIgnoreCase(role) || "ROLE_MANAGER".equalsIgnoreCase(role)) {
