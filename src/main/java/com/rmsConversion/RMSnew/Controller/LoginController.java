@@ -27,7 +27,6 @@ public class LoginController {
         JSONArray responseArray = new JSONArray();
         JSONObject response = new JSONObject();
 
-        // Find user by username
         Optional<User> userOpt = userService.findByUsername(username)
                 .filter(User::isEnabled)
                 .filter(user -> passwordEncoder.matches(password, user.getPassword()));
