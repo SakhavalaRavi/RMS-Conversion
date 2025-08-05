@@ -1,54 +1,30 @@
 package com.rmsConversion.RMSnew.Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.rmsConversion.RMSnew.Model.AndroidAllocationMst;
 import com.rmsConversion.RMSnew.Model.AndroidMenuMst;
-import com.rmsConversion.RMSnew.Repository.AndroidMenuAllocationRepository;
-import com.rmsConversion.RMSnew.Repository.AndroidMenuRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class AndroidMenuService {
+public interface AndroidMenuService {
     
-    @Autowired
-    private AndroidMenuRepository androidMenuRepository;
+    List<Object[]> getMenuByUserId(Long userId);
     
-    @Autowired
-    private AndroidMenuAllocationRepository androidMenuAllocationRepository;
+    List<Object[]> getMenuByManagerId(Long managerId);
     
-    public List<Object[]> getMenuByUserId(Long userId) {
-        return androidMenuRepository.getMenuByUserId(userId);
-    }
+    void androiddeleteMenu(Long userId);
     
-    public List<Object[]> getMenuByManagerId(Long managerId) {
-        return androidMenuRepository.getMenuByManagerId(managerId);
-    }
+    void androidnewMenu(AndroidAllocationMst mst);
     
-    public void androiddeleteMenu(Long userId) {
-        androidMenuAllocationRepository.androiddeleterMenu(userId);
-    }
+    List<Object[]> GetAllandroidMenu(Long userid);
     
-    public void androidnewMenu(AndroidAllocationMst mst) {
-        androidMenuAllocationRepository.save(mst);
-    }
+    List<Object[]> GetAllandroidMenuForManager(Long managerid);
     
-    public List<Object[]> GetAllandroidMenu(Long userid) {
-        return androidMenuRepository.GetAllandroidMenu(userid);
-    }
+    void androiddeleteUserMenu(long userId);
     
-    public List<Object[]> GetAllandroidMenuForManager(Long managerid) {
-        return androidMenuRepository.GetAllandroidMenuForManager(managerid);
-    }
+    Optional<AndroidMenuMst> androidfindByMenuId(Long mid);
     
-    public void androiddeleteUserMenu(long userId) {
-        androidMenuRepository.androiddeleteUserMenu(userId);
-    }
+    List<Object[]> androidgetAllocatedMenuByUserId(Long Id);
     
-    public Optional<AndroidMenuMst> androidfindByMenuId(Long mid) {
-        return androidMenuRepository.androidfindByMenuId(mid);
-    }
+    List<Object[]> androidgetAllocatedMenuByManagerId(Long Id);
 } 

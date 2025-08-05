@@ -1,6 +1,7 @@
 package com.rmsConversion.RMSnew.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,17 +10,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rmsConversion.RMSnew.Model.AndroidAllocationMst;
+import com.rmsConversion.RMSnew.Model.AndroidDashboardMaster;
 import com.rmsConversion.RMSnew.Model.SpringException;
 import com.rmsConversion.RMSnew.Model.User;
 import com.rmsConversion.RMSnew.Model.UserRole;
+import com.rmsConversion.RMSnew.Service.AndroidDashboardService;
 import com.rmsConversion.RMSnew.Service.AndroidMenuService;
 import com.rmsConversion.RMSnew.Service.UserService;
+import com.rmsConversion.RMSnew.Repository.AndroidMenuAllocationRepository;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -31,6 +38,12 @@ public class AndroidMenuController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private AndroidDashboardService androidDashboardService;
+    
+    @Autowired
+    private AndroidMenuAllocationRepository menuAlloRepo;
     
     @RequestMapping(value = "/androidgetmenu/{userid}", produces = { "application/json" }, method = RequestMethod.GET)
     public ResponseEntity<String> getAndroidMenu(@PathVariable Long userid) {
@@ -202,4 +215,157 @@ public class AndroidMenuController {
             return ResponseEntity.internalServerError().body(new SpringException(false, "Error: " + e.getMessage()).toString());
         }
     }
-} 
+    
+    @RequestMapping(value = "/androidallocateRedirectUrl", produces = { "application/json" }, method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> allocateRedirectUrl(@RequestParam(value = "uid") Long uid,
+                                                                   @RequestParam(value = "mid") Long mid) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            User user = userService.getuserbyid(uid);
+            for (UserRole role : user.getUserRole()) {
+                String r = role.getRole().toString();
+
+                AndroidDashboardMaster existing = null;
+
+                if ("ROLE_USER".equalsIgnoreCase(r)) {
+                    existing = androidDashboardService.findByUserIdAndRole(uid, r);
+                } else if ("ROLE_MANAGER".equalsIgnoreCase(r)) {
+                    existing = androidDashboardService.findByManagerIdAndRole(uid, r);
+                } else {
+                    continue;
+                }
+
+                if (existing != null) {
+                    existing.setMid(mid);
+                    androidDashboardService.save(existing);
+                } else {
+                    AndroidDashboardMaster adm = new AndroidDashboardMaster();
+                    adm.setMid(mid);
+                    adm.setRole(r);
+
+                    if ("ROLE_USER".equalsIgnoreCase(r)) {
+                        adm.setUserId(uid);
+                        adm.setManagerId(0L);
+                    } else if ("ROLE_MANAGER".equalsIgnoreCase(r)) {
+                        adm.setManagerId(uid);
+                        adm.setUserId(0L);
+                    }
+
+                    androidDashboardService.save(adm);
+                }
+            }
+
+            response.put("status", "success");
+            response.put("message", "Redirect URL allocated successfully.");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "An error occurred: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        }
+    
+    @RequestMapping(value = "/androidgetAllocatedMenuById/{id}", produces = {
+            "application/json" }, method = RequestMethod.GET)
+    public String androidgetMenuById(@PathVariable Long id) {
+        User user = userService.getuserbyid(id);
+        JSONArray jarray = new JSONArray();
+        for (UserRole role : user.getUserRole()) {
+            String r = role.getRole().toString();
+
+            if ("ROLE_USER".equalsIgnoreCase(r)) {
+                List<Object[]> list = androidMenuService.androidgetAllocatedMenuByUserId(id);
+                if (!list.isEmpty()) {
+                    for (Object[] result1 : list) {
+                        Map<String, String> jsonOrderedMap = new LinkedHashMap<>();
+                        jsonOrderedMap.put("id", result1[0].toString());
+                        jsonOrderedMap.put("menuname", result1[1].toString());
+                        jsonOrderedMap.put("url", result1[2].toString());
+                        jsonOrderedMap.put("allocation", result1[3].toString());
+                        jsonOrderedMap.put("userid", result1[4] == null ? "0" : result1[4].toString());
+                        jarray.put(jsonOrderedMap);
+                    }
+                }
+            }
+
+            if ("ROLE_MANAGER".equalsIgnoreCase(r)) {
+                List<Object[]> list = androidMenuService.androidgetAllocatedMenuByManagerId(id);
+                if (!list.isEmpty()) {
+                    for (Object[] result1 : list) {
+                        Map<String, String> jsonOrderedMap = new LinkedHashMap<>();
+                        jsonOrderedMap.put("id", result1[0].toString());
+                        jsonOrderedMap.put("menuname", result1[1].toString());
+                        jsonOrderedMap.put("url", result1[2].toString());
+                        jsonOrderedMap.put("allocation", result1[3].toString());
+                        jsonOrderedMap.put("managerid", result1[4] == null ? "0" : result1[4].toString());
+                        jarray.put(jsonOrderedMap);
+                    }
+                }
+
+            }
+        }
+        return jarray.toString();
+    }
+    
+    @RequestMapping(value = "/androidAllocateMenuForBoth", produces = {
+            "application/json" }, method = RequestMethod.POST)
+    public String androidAllocateMenuForBoth(@RequestParam(value = "userid") Long userid,
+            @RequestParam(value = "allocated[]") Integer[] allocated) {
+
+        boolean isManager = true;
+
+        try {
+            List<AndroidAllocationMst> userRecords = menuAlloRepo.findByUserId(userid);
+
+            if (!userRecords.isEmpty()) {
+                androidMenuService.androiddeleteUserMenu(userid);
+                isManager = false;
+
+            } else {
+                menuAlloRepo.androiddeleterMenu(userid);
+                isManager = true;
+            }
+
+        } catch (Exception e) {
+            try {
+                List<AndroidAllocationMst> managerRecords = menuAlloRepo.findByManagerId(userid);
+                if (!managerRecords.isEmpty()) {
+                    menuAlloRepo.androiddeleterMenu(userid);
+                    isManager = true;
+                } else {
+                    androidMenuService.androiddeleteUserMenu(userid);
+                    isManager = false;
+                }
+            } catch (Exception ex) {
+                androidMenuService.androiddeleteUserMenu(userid);
+                isManager = false;
+            }
+        }
+
+        for (int i = 0; i < allocated.length; i++) {
+            if (allocated[i] != 0) {
+                AndroidAllocationMst mst = new AndroidAllocationMst();
+
+                if (isManager) {
+                    mst.setManagerId(userid);
+                    mst.setUserId(0L);
+                    System.out.println("Saving menu " + allocated[i] + " with Manager ID: " + userid + ", User ID: 0");
+                } else {
+                    mst.setManagerId(0L);
+                    mst.setUserId(userid);
+                    System.out.println("Saving menu " + allocated[i] + " with User ID: " + userid + ", Manager ID: 0");
+                }
+
+                mst.setMid(Long.valueOf("" + allocated[i]));
+                androidMenuService.androidnewMenu(mst);
+            }
+        }
+
+        String message = isManager ? "Menu Successfully Allocated to Manager!" : "Menu Successfully Allocated to User!";
+        return new SpringException(true, message).toString();
+    }
+
+
+    
+}  
