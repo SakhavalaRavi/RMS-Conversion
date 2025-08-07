@@ -1,6 +1,10 @@
 package com.rmsConversion.RMSnew.Controller;
 
+import com.rmsConversion.RMSnew.Model.DashboardMaster;
+import com.rmsConversion.RMSnew.Model.MenuMst;
 import com.rmsConversion.RMSnew.Model.User;
+import com.rmsConversion.RMSnew.Service.DashBoardMasterService;
+import com.rmsConversion.RMSnew.Service.MenuService;
 import com.rmsConversion.RMSnew.Service.UserService;
 import com.rmsConversion.RMSnew.springSecurity.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +22,12 @@ import java.util.Optional;
 public class LoginController {
     @Autowired
     private UserService userService;
-    @Autowired  
+    @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    DashBoardMasterService dashboardService;
+    @Autowired
+    MenuService menuService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @RequestMapping(value = "/user/UserLogin/{username}/{password}", method = RequestMethod.GET, produces = "application/json")
@@ -42,23 +50,42 @@ public class LoginController {
                     response.put("uId", user.getId());
                     response.put("role", role);
                     response.put("username", user.getUsername());
-                    // response.put("redirectUrl", ""); // For future use
                     responseArray.put(response);
                     return responseArray.toString();
                 }
             }
+
             for (UserRole roleObj : user.getUserRole()) {
                 String role = roleObj.getRole();
-                if ("ROLE_USER".equalsIgnoreCase(role) || "ROLE_MANAGER".equalsIgnoreCase(role)) {
-                    response.put("api", token);
-                    response.put("responseCode", "SUCCESS");
-                    response.put("uId", user.getId());
-                    response.put("role", role);
-                    response.put("username", user.getUsername());
-                    response.put("redirectUrl", JSONObject.NULL); // Placeholder for future redirectUrl
-                    responseArray.put(response);
-                    return responseArray.toString();
+                DashboardMaster dashboard = null;
+                String defaultURL = null;
+                if ("ROLE_USER".equalsIgnoreCase(role)) {
+                    dashboard = dashboardService.findByUserIdAndRole(user.getId(), role);
+                } else if ("ROLE_MANAGER".equalsIgnoreCase(role)) {
+                    dashboard = dashboardService.findByManagerIdAndRole(user.getId(), role);
+
+                } else {
+                    // log.info(" LOG BONRIX the role is:: " + user.getUserRole());
+                    continue;
                 }
+
+                if (dashboard != null) {
+                    MenuMst menu = menuService.findByMid(dashboard.getMid());
+                    if (menu != null) {
+                        // user.setRedirectUrl(menu.getMenuurl());
+                        defaultURL = menu.getMenuurl();
+                    }
+                }
+
+                response.put("api", token);
+                response.put("responseCode", "SUCCESS");
+                response.put("uId", user.getId());
+                response.put("role", role);
+                response.put("username", user.getUsername());
+                response.put("redirectUrl", defaultURL);
+
+                responseArray.put(response);
+                return responseArray.toString();
             }
             response.put("responseCode", "FAIL");
             responseArray.put(response);
@@ -69,4 +96,4 @@ public class LoginController {
             return responseArray.toString();
         }
     }
-} 
+}
