@@ -16,39 +16,39 @@ import java.util.List;
 @Configuration
 public class OpenAPIConfig {
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        Server devServer = new Server()
-                .url("http://localhost:8080")
-                .description("Ravi's Development server");
+        @Bean
+        public OpenAPI customOpenAPI() {
+                Server devServer = new Server()
+                                .url("http://localhost:8080")
+                                .description("Ravi's Development server");
 
-        Contact contact = new Contact()
-                .email("contact@rmsconversion.com")
-                .name("RMS Conversion")
-                .url("https://www.rmsconversion.com");
+                Contact contact = new Contact()
+                                .email("contact@rmsconversion.com")
+                                .name("RMS Conversion")
+                                .url("https://www.rmsconversion.com");
 
-        License mitLicense = new License()
-                .name("MIT License")
-                .url("https://choosealicense.com/licenses/mit/");
+                License mitLicense = new License()
+                                .name("MIT License")
+                                .url("https://choosealicense.com/licenses/mit/");
 
-        Info info = new Info()
-                .title("RMS Conversion API")
-                .version("1.0")
-                .contact(contact)
-                .description("This API exposes endpoints for RMS Conversion System.")
-                .termsOfService("https://www.rmsconversion.com/terms")
-                .license(mitLicense);
+                Info info = new Info()
+                                .title("RMS Conversion API")
+                                .version("1.0")
+                                .contact(contact)
+                                .description("This API exposes endpoints for RMS Conversion System.")
+                                .termsOfService("https://www.rmsconversion.com/terms")
+                                .license(mitLicense);
 
-        return new OpenAPI()
-                .info(info)
-                .servers(List.of(devServer))
-                .components(new Components()
-                    .addSecuritySchemes("bearer-jwt",
-                        new SecurityScheme()
-                            .type(SecurityScheme.Type.HTTP)
-                            .scheme("bearer")
-                            .bearerFormat("JWT")
-                            .name("Authorization")))
-                .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"));
-    }
+                return new OpenAPI()
+                                .info(info)
+                                .servers(List.of(devServer))
+                                .components(new Components()
+                                                .addSecuritySchemes("bearer-jwt",
+                                                                new SecurityScheme()
+                                                                                .type(SecurityScheme.Type.HTTP)
+                                                                                .scheme("bearer")
+                                                                                .bearerFormat("JWT")
+                                                                                .name("Authorization")))
+                                .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"));
+        }
 }

@@ -127,4 +127,4 @@ public class ActionPasswordServiceImpl implements ActionPasswordService {
 	public List<String> getTypesByManagerId(Long managerId) {
 		return actionPasswordRepository.findDistinctTypesByManagerId(managerId);
 	}
-} 
+}
