@@ -1,11 +1,9 @@
 package com.rmsConversion.RMSnew.Controller;
 
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,23 +25,17 @@ import com.rmsConversion.RMSnew.Model.User;
 import com.rmsConversion.RMSnew.Model.UserRole;
 import com.rmsConversion.RMSnew.Service.AlertMessageSummaryService;
 import com.rmsConversion.RMSnew.Service.UserService;
-import com.ibm.icu.text.SimpleDateFormat;
 
 @CrossOrigin(origins = { "*" })
 @RestController
 @RequestMapping("/api")
 public class AlertMessageSummaryController {
 
-	
-
 	@Autowired
 	private AlertMessageSummaryService alertService;
 
 	@Autowired
 	private UserService userService;
-
-	
-
 
 	@GetMapping("/alertCountByType/{fromDate}/{toDate}/{uid}")
 	public List<AlertStatusDTO> countByType(
@@ -84,7 +76,6 @@ public class AlertMessageSummaryController {
 		return Collections.emptyList();
 	}
 
-	
 	@GetMapping("/getAlertBySite/{fromDate}/{toDate}/{uid}")
 	public List<AlertCountBySiteDTO> bySite(
 			@PathVariable("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date fromDate,
@@ -155,7 +146,6 @@ public class AlertMessageSummaryController {
 		return Collections.emptyList();
 	}
 
-	
 	@GetMapping("/getActiveAlertByType/{fromDate}/{toDate}/{uid}")
 	public List<AlertStatusDTO> activeByType(
 			@PathVariable("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date fromDate,
@@ -175,7 +165,6 @@ public class AlertMessageSummaryController {
 		return Collections.emptyList();
 	}
 
-	
 	@GetMapping("/alert-trend/{fromDate}/{toDate}/{uid}")
 	public List<AlertTrendDto> getTrend(
 			@PathVariable("fromDate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date fromDate,
@@ -195,8 +184,6 @@ public class AlertMessageSummaryController {
 		return Collections.emptyList();
 	}
 
-
-
 	@GetMapping("/getResolutionTimeTrend/{uid}")
 	public List<Map<String, Object>> getResolutionTimeTrend(@PathVariable("uid") Long uid) {
 		User user = userService.getuserbyid(uid);
@@ -213,7 +200,6 @@ public class AlertMessageSummaryController {
 		return Collections.emptyList();
 	}
 
-	
 	@GetMapping("/frequencyHitmapOfLastWeek/{uid}")
 	public List<AlertFrequency> frequencyLast7Days(@PathVariable Long uid) {
 		User user = userService.getuserbyid(uid);
@@ -230,6 +216,4 @@ public class AlertMessageSummaryController {
 		return Collections.emptyList();
 	}
 
-	
-
-} 
+}
