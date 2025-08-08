@@ -91,6 +91,13 @@
 			<artifactId>gson</artifactId>
 			<version>2.10.1</version>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.ibm.icu/icu4j -->
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>74.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>
