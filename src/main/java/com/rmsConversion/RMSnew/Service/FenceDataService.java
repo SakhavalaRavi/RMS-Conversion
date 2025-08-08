@@ -1,11 +1,6 @@
 package com.rmsConversion.RMSnew.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.ResponseEntity;
-
 import com.rmsConversion.RMSnew.Model.FenceData;
 
 public interface FenceDataService {

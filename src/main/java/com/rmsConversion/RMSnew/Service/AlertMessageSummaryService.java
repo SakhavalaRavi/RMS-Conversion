@@ -7,42 +7,22 @@ import com.rmsConversion.RMSnew.DTO.AlertFrequency;
 import com.rmsConversion.RMSnew.DTO.AlertStatusDTO;
 import com.rmsConversion.RMSnew.DTO.AlertTrendDto;
 import com.rmsConversion.RMSnew.DTO.SiteStatsDTO;
-import com.rmsConversion.RMSnew.Model.AlearSummary;
-import com.rmsConversion.RMSnew.Model.DeviceProfile;
 import com.rmsConversion.RMSnew.Repository.RecentAlertRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.time.ZoneId;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +30,6 @@ public class AlertMessageSummaryService {
 
 	@Autowired
 	RecentAlertRepository repo;
-
 
 	public int getRecentAlertsCount(String fromdate, String todate, Long deviceId, String status, Long parameterId,
 			Long managerId) {
@@ -61,8 +40,6 @@ public class AlertMessageSummaryService {
 
 		return repo.countAlerts(fromdate, todate, deviceIdParam, statusStr, parameterIdParam, managerId);
 	}
-
-	
 
 	public List<Object[]> getRecentAlertsPageForUser(String fromdate, String todate, Long deviceId, String status,
 			int size, int page, Long parameterId, Long userId) {
@@ -237,8 +214,6 @@ public class AlertMessageSummaryService {
 		return result;
 	}
 
-	
-
 	public List<Map<String, Object>> getLast30DaysTrend(Long managerId) {
 		List<Object[]> rawData = repo.findLast30DaysAvgDurationInMinutes(managerId);
 
@@ -356,4 +331,4 @@ public class AlertMessageSummaryService {
 
 		return result;
 	}
-} 
+}
