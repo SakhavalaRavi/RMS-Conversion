@@ -134,7 +134,7 @@ public class Devicemaster {
 		this.managerId = managerId;
 	}
 
-	@Column
+
 	public String getAltdevicename() {
 		return altdevicename;
 	}
@@ -143,13 +143,4 @@ public class Devicemaster {
 		this.altdevicename = altdevicename;
 	}
 
-    public Long getSitename() {
-        return sitename;
-    }
-
-    public void setSitename(Long sitename) {
-        this.sitename = sitename;
-    }
-
-    
 }
