@@ -1,5 +1,7 @@
 package com.rmsConversion.RMSnew.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rmsConversion.RMSnew.DTO.ActiveAlertDTO;
 import com.rmsConversion.RMSnew.DTO.AlertCountBySiteDTO;
 import com.rmsConversion.RMSnew.DTO.AlertDurationDTO;
@@ -7,13 +9,18 @@ import com.rmsConversion.RMSnew.DTO.AlertFrequency;
 import com.rmsConversion.RMSnew.DTO.AlertStatusDTO;
 import com.rmsConversion.RMSnew.DTO.AlertTrendDto;
 import com.rmsConversion.RMSnew.DTO.SiteStatsDTO;
+import com.rmsConversion.RMSnew.Repository.DeviceProfileRepository;
+import com.rmsConversion.RMSnew.Repository.DevicemasterRepository;
 import com.rmsConversion.RMSnew.Repository.RecentAlertRepository;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -21,6 +28,8 @@ import java.time.ZoneId;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.format.TextStyle;
 import java.util.stream.Collectors;
@@ -31,6 +40,12 @@ public class AlertMessageSummaryService {
 	@Autowired
 	RecentAlertRepository repo;
 
+	@Autowired
+	DeviceProfileRepository dprepo;
+
+	@Autowired
+	DevicemasterRepository dmrepo;
+
 	public int getRecentAlertsCount(String fromdate, String todate, Long deviceId, String status, Long parameterId,
 			Long managerId) {
 		String statusStr = (status == null || "none".equalsIgnoreCase(status)) ? "none" : status.toLowerCase();
@@ -39,17 +54,6 @@ public class AlertMessageSummaryService {
 		Long parameterIdParam = (parameterId != null && parameterId > 0) ? parameterId : 0L;
 
 		return repo.countAlerts(fromdate, todate, deviceIdParam, statusStr, parameterIdParam, managerId);
-	}
-
-	public List<Object[]> getRecentAlertsPageForUser(String fromdate, String todate, Long deviceId, String status,
-			int size, int page, Long parameterId, Long userId) {
-		int offset = (page - 1) * size;
-		String statusStr = (status == null || "none".equalsIgnoreCase(status)) ? "none" : status.toLowerCase();
-		Long deviceIdParam = (deviceId != null && deviceId > 0) ? deviceId : 0L;
-		Long parameterIdParam = (parameterId != null && parameterId > 0) ? parameterId : 0L;
-
-		return repo.findAlertsForUser(fromdate, todate, deviceIdParam, statusStr, parameterIdParam, userId, size,
-				offset);
 	}
 
 	public List<AlertStatusDTO> getAlertCountsByType(Date fromDate, Date toDate, Long managerId) {
@@ -331,4 +335,83 @@ public class AlertMessageSummaryService {
 
 		return result;
 	}
+
+	public List<Object[]> getRecentAlertsPage(String fromdate, String todate, Long deviceId, String status, int size,
+			int page, Long parameterId, Long managerId) {
+		int offset = (page - 1) * size;
+
+		String statusStr = (status == null || "none".equalsIgnoreCase(status)) ? "none" : status.toLowerCase();
+
+		Long deviceIdParam = (deviceId != null && deviceId > 0) ? deviceId : 0L;
+		Long parameterIdParam = (parameterId != null && parameterId > 0) ? parameterId : 0L;
+
+		return repo.findAlerts(fromdate, todate, deviceIdParam, statusStr, parameterIdParam, managerId, size, offset);
+	}
+
+	
+	public int getRecentAlertsCountForUser(String fromdate, String todate, Long deviceId, String status,
+			Long parameterId, Long userId) {
+		String statusStr = (status == null || "none".equalsIgnoreCase(status)) ? "none" : status.toLowerCase();
+		Long deviceIdParam = (deviceId != null && deviceId > 0) ? deviceId : 0L;
+		Long parameterIdParam = (parameterId != null && parameterId > 0) ? parameterId : 0L;
+
+		return repo.countAlertsForUser(fromdate, todate, deviceIdParam, statusStr, parameterIdParam, userId);
+	}
+
+	public List<Object[]> getRecentAlertsPageForUser(String fromdate, String todate, Long deviceId, String status,
+	int size, int page, Long parameterId, Long userId) {
+	int offset = (page - 1) * size;
+	String statusStr = (status == null || "none".equalsIgnoreCase(status)) ? "none" : status.toLowerCase();
+	Long deviceIdParam = (deviceId != null && deviceId > 0) ? deviceId : 0L;
+	Long parameterIdParam = (parameterId != null && parameterId > 0) ? parameterId : 0L;
+
+		return repo.findAlerts(fromdate, todate, deviceIdParam, statusStr, parameterIdParam, userId, size, offset);
+	}
+
+
+	public List<Object[]> Assigndeviceprofilebyuid(Long uid) {
+        return dprepo.Assigndeviceprofilebyuid(uid);
+    }
+
+    public List<Object[]> assigndeviceprofilebymanagerid(Long managerId) {
+        return dprepo.assigndeviceprofilebymanagerid(managerId);
+    }
+
+	private final ObjectMapper mapper = new ObjectMapper();
+
+	public List<Map<String, Object>> getDeviceResponseGrouped(Long deviceId, List<Object[]> profileList) {
+
+		List<String> profiles = profileList.stream().map(row -> row[0] == null ? null : row[0].toString())
+				.filter(Objects::nonNull).collect(Collectors.toList());
+
+		List<Object[]> rows = (deviceId != null) ? dmrepo.getDeviceData(deviceId)
+				: dmrepo.getAllDeviceData(profiles);
+
+		List<Map<String, Object>> flat = new ArrayList<>();
+		Set<String> seen = new HashSet<>();
+
+		for (Object[] row : rows) {
+			String profName = (String) row[2];
+			String jsonParam = (String) row[3];
+
+			try {
+				JsonNode node = mapper.readTree(jsonParam);
+				long pid = node.path("parameterId").asLong();
+				String pnam = node.path("parametername").asText();
+				String key = profName + "|" + pid;
+				if (seen.add(key)) {
+					Map<String, Object> rec = new LinkedHashMap<>();
+					rec.put("parameterId", pid);
+					rec.put("parametername", pnam);
+					rec.put("profileName", profName);
+					flat.add(rec);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return flat;
+	}
+
 }

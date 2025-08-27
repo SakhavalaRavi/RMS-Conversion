@@ -66,7 +66,7 @@ public class FenceDataServiceImpl implements FenceDataService {
 	private SimpleDateFormat sdfDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public List<Map<String, Object>> getGeofenceReport(Long managerId, Long deviceId, Date startDateStr,
-			Date endDateStr) {
+			Date endDateStr)   {
 		List<Map<String, Object>> result = new ArrayList<>();
 
 		List<FenceData> fences = fenceDataRepository.findAllByManagerId(managerId);

@@ -116,11 +116,11 @@ public class PoiServiceImpl implements PoiService {
 							poi.getLatitude() != null ? poi.getLatitude() : 0.0,
 							poi.getLongitude() != null ? poi.getLongitude() : 0.0, lat, lng) * 1000;
 
-//	                System.out.println("POI Latitude: " + poi.getLatitude() +
-//	                        ", POI Longitude: " + poi.getLongitude() +
-//	                        ", Current Latitude: " + lat +
-//	                        ", Current Longitude: " + lng +
-//	                        ", Distance: " + dist + " meters");
+	                log.info("POI Latitude: " + poi.getLatitude() +
+	                        ", POI Longitude: " + poi.getLongitude() +
+	                        ", Current Latitude: " + lat +
+	                        ", Current Longitude: " + lng +
+	                        ", Distance: " + dist + " meters");
 
 					if (dist < radius && !insidePoi) {
 						entry = new HashMap<>();
@@ -128,7 +128,7 @@ public class PoiServiceImpl implements PoiService {
 						entry.put("location", poi.getLocation());
 						insidePoi = true;
 
-						System.out.println(">> Entered POI at: " + sdf.format(history.getDeviceDate()));
+						log.info(">> Entered POI at: " + sdf.format(history.getDeviceDate()));
 
 					} else if (dist >= radius && insidePoi) {
 						if (entry != null) {
@@ -142,7 +142,7 @@ public class PoiServiceImpl implements PoiService {
 
 							maplist.add(entry);
 
-							System.out.println("<< Exited POI at: " + sdf.format(endTime));
+							log.info("<< Exited POI at: " + sdf.format(endTime));
 						}
 						insidePoi = false;
 					}

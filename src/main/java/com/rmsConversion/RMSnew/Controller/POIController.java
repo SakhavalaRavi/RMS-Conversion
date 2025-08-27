@@ -71,7 +71,7 @@ public class POIController {
 		}
 	}
 	
-	@GetMapping("/api/getPoiReport")
+	@GetMapping("/getPoiReport")
     public ResponseEntity<?> getPoiReport(
             @RequestParam Long deviceId,
             @RequestParam Long managerId,
@@ -88,7 +88,7 @@ public class POIController {
         }
     }
 	
-	@GetMapping("/api/getPoiReportByUser")
+	@GetMapping("/getPoiReportByUser")
 	public ResponseEntity<?> getPoiReportByUser(@RequestParam Long deviceId, @RequestParam Long userId,
 			@RequestParam String sdate, @RequestParam String edate, @RequestParam String poiname,
 			@RequestParam int radius) {
@@ -103,7 +103,7 @@ public class POIController {
 		}
 	}
 	
-	@GetMapping("/api/getTripReport")
+	@GetMapping("/getTripReport")
 	public ResponseEntity<?> getTripReport(@RequestParam String did,
 	                                       @RequestParam int mintrip,
 	                                       @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") String fromdate,

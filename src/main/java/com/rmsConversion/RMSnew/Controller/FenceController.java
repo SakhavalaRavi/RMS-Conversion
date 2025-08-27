@@ -82,14 +82,14 @@ public class FenceController {
 		}
 	}
 
-	@GetMapping("/api/getGeofenceReport/{managerId}/{deviceId}")
+	@GetMapping("/getGeofenceReport/{managerId}/{deviceId}")
 	public List<Map<String, Object>> getGeofenceReport(@PathVariable Long managerId, @PathVariable Long deviceId,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date  startDate,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date  endDate) {
 		return fenceDataService.getGeofenceReport(managerId, deviceId, startDate, endDate);
 	}
 	
-	@GetMapping("/api/getGeofenceReportByUser/{userId}/{deviceId}")
+	@GetMapping("/getGeofenceReportByUser/{userId}/{deviceId}")
 	public List<Map<String, Object>> getGeofenceReportByUser(@PathVariable Long userId, @PathVariable Long deviceId,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date startDate,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endDate) {
@@ -100,7 +100,7 @@ public class FenceController {
 		return fenceDataService.getGeofenceReport(managerId, deviceId, startDate, endDate);
 	}
 
-	@GetMapping("/api/getGPSPoint")
+	@GetMapping("/getGPSPoint")
 	public ResponseEntity<Map<String, Object>> getSurroundingData(@RequestParam Long deviceId,
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date date) {
 
