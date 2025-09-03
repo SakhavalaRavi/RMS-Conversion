@@ -99,4 +99,4 @@ public class JsonDataUserType implements UserType<Map<String, Object>> {
     public Map<String, Object> replace(Map<String, Object> detached, Map<String, Object> managed, Object owner) throws HibernateException {
         return deepCopy(detached);
     }
-} 
+}
