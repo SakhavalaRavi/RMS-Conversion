@@ -35,15 +35,15 @@ public class Lasttrack {
     private Date SystemDate;
 
     @Type(value = JsonDataUserType.class)
-    @Column(name = "digitaldata")
+    @Column(name = "digitaldata", columnDefinition = "json")
     private Map<String, Object> analogdigidata;
 
     @Type(value = JsonDataUserType.class)
-    @Column(name = "gpsdata")
+    @Column(name = "gpsdata", columnDefinition = "json")
     private Map<String, Object> gpsdata;
 
     @Type(value = JsonDataUserType.class)
-    @Column(name = "devicedata")
+    @Column(name = "devicedata", columnDefinition = "json")
     private Map<String, Object> devicedata;
 
     public Long getDeviceId() {
