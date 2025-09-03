@@ -199,4 +199,32 @@ public interface RecentAlertRepository extends JpaRepository<AlearSummary, Long>
 			+ "ORDER BY hour ASC", nativeQuery = true)
 	List<Object[]> findRawFrequencySinceForUser(@Param("cutoff") Timestamp cutoff, @Param("userId") Long userId);
 
+
+	@Query(value = "SELECT s.site_name, a.deviceid, a.parametername, "
+			+ "to_char(a.starttime, 'YYYY-MM-DD HH24:MI:SS') AS start_time, " + "CASE WHEN a.endtime IS NULL THEN NULL "
+			+ "     ELSE to_char(a.endtime, 'YYYY-MM-DD HH24:MI:SS') END AS end_time, " + "a.duration, "
+			+ "CASE WHEN a.endtime IS NULL THEN 'Active' ELSE 'Resolved' END AS status " + "FROM alearsummary a "
+			+ "JOIN assignsite asg ON a.deviceid = asg.deviceid " + "JOIN site s ON asg.siteid = s.siteid "
+			+ "WHERE a.starttime >= CAST(:fromdate AS timestamp) " + "AND a.starttime <= CAST(:todate AS timestamp) "
+			+ "AND (COALESCE(:deviceId, 0) = 0 OR a.deviceid = :deviceId) "
+			+ "AND (COALESCE(:parameterId, 0) = 0 OR a.parameterid = :parameterId) "
+			+ "AND (COALESCE(:statusStr, 'none') = 'none' OR " + "    (:statusStr = 'true' AND a.endtime IS NULL) OR "
+			+ "    (:statusStr = 'false' AND a.endtime IS NOT NULL)) " + "AND s.managerid = :managerId "
+			+ "ORDER BY a.starttime DESC " + "LIMIT :limit OFFSET :offset", nativeQuery = true)
+	List<Object[]> findAlerts(@Param("fromdate") String fromdate, @Param("todate") String todate,
+			@Param("deviceId") Long deviceId, @Param("statusStr") String statusStr,
+			@Param("parameterId") Long parameterId, @Param("managerId") Long managerId, @Param("limit") int limit,
+			@Param("offset") int offset);
+
+			@Query(value = "SELECT COUNT(*) FROM alearsummary a " + "JOIN assignuserdevice aud ON a.deviceid = aud.device_id "
+			+ "JOIN assignsite asg ON a.deviceid = asg.deviceid " + "JOIN site s ON asg.siteid = s.siteid "
+			+ "WHERE a.starttime >= CAST(:fromdate AS timestamp) " + "AND a.starttime <= CAST(:todate AS timestamp) "
+			+ "AND (COALESCE(:deviceId, 0) = 0 OR a.deviceid = :deviceId) "
+			+ "AND (COALESCE(:parameterId, 0) = 0 OR a.parameterid = :parameterId) "
+			+ "AND (COALESCE(:statusStr, 'none') = 'none' OR " + "    (:statusStr = 'true' AND a.endtime IS NULL) OR "
+			+ "    (:statusStr = 'false' AND a.endtime IS NOT NULL)) "
+			+ "AND aud.user_id = :userId", nativeQuery = true)
+	Integer countAlertsForUser(@Param("fromdate") String fromdate, @Param("todate") String todate,
+			@Param("deviceId") Long deviceId, @Param("statusStr") String statusStr,
+			@Param("parameterId") Long parameterId, @Param("userId") Long userId);
 } 
